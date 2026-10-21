@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRUD de tareas</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 560px; margin: 40px auto; padding: 0 16px; }
+    h1 { margin-bottom: 16px; }
+    form { display: flex; gap: 8px; margin-bottom: 20px; }
+    input[type="text"] { flex: 1; padding: 8px; font-size: 1rem; }
+    button { padding: 8px 12px; cursor: pointer; }
+    ul { list-style: none; padding: 0; }
+    li { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #ddd; }
+    li span { flex: 1; }
+    li.hecha span { text-decoration: line-through; color: #888; }
+    #error { color: #b00020; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Lista de tareas</h1>
+  <div id="error"></div>
+
+  <form id="form-tarea">
+    <input type="text" id="titulo" placeholder="Nueva tarea..." required />
+    <button type="submit">Agregar</button>
+  </form>
+
+  <ul id="lista"></ul>
+
+  <script>
+    const API = '/api/tareas';
+    const lista = document.getElementById('lista');
+    const form = document.getElementById('form-tarea');
+    const inputTitulo = document.getElementById('titulo');
+    const errorBox = document.getElementById('error');
+
+    function mostrarError(msg) { errorBox.textContent = msg || ''; }
+
+    // Función auxiliar para hacer peticiones y manejar errores
+    async function peticion(url, opciones) {
+      const res = await fetch(url, opciones);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error en la petición');
+      return data;
+    }
+
+    // GET: cargar y pintar las tareas
+    async function cargarTareas() {
+      try {
+        const tareas = await peticion(API);
+        lista.innerHTML = '';
+        tareas.forEach(pintarTarea);
+        mostrarError('');
+      } catch (e) { mostrarError(e.message); }
+    }
+
+    function pintarTarea(t) {
+      const li = document.createElement('li');
+      if (t.completada) li.classList.add('hecha');
+
+      const check = document.createElement('input');
+      check.type = 'checkbox';
+      check.checked = t.completada;
+      check.onchange = () => actualizar(t.id, { completada: check.checked });
+
+      const span = document.createElement('span');
+      span.textContent = t.titulo;
+
+      const btnEditar = document.createElement('button');
+      btnEditar.textContent = 'Editar';
+      btnEditar.onclick = () => {
+        const nuevo = prompt('Editar tarea:', t.titulo);
+        if (nuevo !== null) actualizar(t.id, { titulo: nuevo });
+      };
+
+      const btnEliminar = document.createElement('button');
+      btnEliminar.textContent = 'Eliminar';
+      btnEliminar.onclick = () => eliminar(t.id);
+
+      li.append(check, span, btnEditar, btnEliminar);
+      lista.appendChild(li);
+    }
+
+    // POST: crear tarea
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await peticion(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ titulo: inputTitulo.value }),
+        });
+        inputTitulo.value = '';
+        cargarTareas();
+      } catch (err) { mostrarError(err.message); }
+    });
+
+    // PUT: actualizar tarea
+    async function actualizar(id, cambios) {
+      try {
+        await peticion(`${API}/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(cambios),
+        });
+        cargarTareas();
+      } catch (err) { mostrarError(err.message); cargarTareas(); }
+    }
+
+    // DELETE: eliminar tarea
+    async function eliminar(id) {
+      try {
+        await peticion(`${API}/${id}`, { method: 'DELETE' });
+        cargarTareas();
+      } catch (err) { mostrarError(err.message); }
+    }
+
+    cargarTareas();
+  </script>
+</body>
+</html>

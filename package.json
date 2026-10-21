@@ -1,0 +1,14 @@
+{
+  "name": "crud-express-mysql",
+  "version": "1.0.0",
+  "description": "CRUD de tareas con Node.js, Express, MySQL y front end en HTML/JS",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mysql2": "^3.11.0"
+  }
+}
