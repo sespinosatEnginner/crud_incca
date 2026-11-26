@@ -1,8 +1,100 @@
-body{
-  padding: 0%;
-  
+:root {
+  --fondo: #f4f5f7;
+  --texto: #1f2933;
+  --suave: #616e7c;
+  --borde: #d9dee4;
+  --primario: #2457c5;
+  --primario-oscuro: #1b44a0;
+  --verde-fondo: #e3f6e8;
+  --verde-borde: #2e8b4f;
+  --verde-texto: #17502d;
+  --rojo-fondo: #fde8e8;
+  --rojo-borde: #c53030;
+  --rojo-texto: #7a1c1c;
 }
 
-body{
-  background-color: azure;
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.45;
+}
+
+.contenedor { max-width: 860px; margin: 0 auto; padding: 32px 16px 48px; }
+
+.encabezado { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; }
+.encabezado h1 { margin: 0; font-size: 1.6rem; }
+.sub { margin: 2px 0 0; color: var(--suave); font-size: .9rem; }
+
+.btn {
+  padding: 9px 16px;
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--texto);
+  font-size: .95rem;
+  cursor: pointer;
+}
+.btn:hover { background: #eef0f3; }
+.btn:disabled { opacity: .6; cursor: not-allowed; }
+.btn-primario { background: var(--primario); border-color: var(--primario); color: #fff; }
+.btn-primario:hover { background: var(--primario-oscuro); }
+.btn-peligro { background: var(--rojo-borde); border-color: var(--rojo-borde); color: #fff; }
+.btn-peligro:hover { background: #9b2424; }
+.btn-chico { padding: 5px 10px; font-size: .85rem; }
+
+.oculto { display: none !important; }
+
+/* Alertas */
+.alerta {
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+  padding: 12px 14px; margin-bottom: 18px;
+  border-radius: 6px; border: 1px solid; border-left-width: 5px;
+}
+.alerta.exito { background: var(--verde-fondo); border-color: var(--verde-borde); color: var(--verde-texto); }
+.alerta.error { background: var(--rojo-fondo); border-color: var(--rojo-borde); color: var(--rojo-texto); }
+.alerta-cerrar { background: none; border: 0; font-size: 1.3rem; line-height: 1; cursor: pointer; color: inherit; }
+
+/* Tarjetas */
+.tarjetas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+.tarjeta { background: #fff; border: 1px solid var(--borde); border-radius: 8px; padding: 14px 16px; }
+.tarjeta-titulo { display: block; color: var(--suave); font-size: .85rem; }
+.tarjeta strong { font-size: 1.7rem; }
+
+/* Tabla */
+.tabla-wrap { background: #fff; border: 1px solid var(--borde); border-radius: 8px; overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 11px 14px; text-align: left; border-bottom: 1px solid var(--borde); }
+th { background: #f9fafb; font-size: .82rem; text-transform: uppercase; letter-spacing: .03em; color: var(--suave); }
+tbody tr:last-child td { border-bottom: 0; }
+td.titulo-hecha { text-decoration: line-through; color: var(--suave); }
+.col-acciones { width: 1%; white-space: nowrap; }
+.acciones { display: flex; gap: 6px; }
+.mensaje-tabla { margin: 0; padding: 22px; text-align: center; color: var(--suave); }
+
+.badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: .8rem; font-weight: 600; }
+.badge.pendiente { background: #fff3d6; color: #7a5200; }
+.badge.completada { background: var(--verde-fondo); color: var(--verde-texto); }
+
+/* Modales */
+dialog { border: 0; border-radius: 10px; padding: 24px; width: min(440px, 92vw); box-shadow: 0 12px 40px rgba(0,0,0,.25); }
+dialog::backdrop { background: rgba(20, 28, 38, .5); }
+dialog h2 { margin: 0 0 14px; font-size: 1.2rem; }
+dialog label { display: block; margin-bottom: 6px; font-weight: 600; font-size: .92rem; }
+dialog input[type="text"] {
+  width: 100%; padding: 9px 10px; font-size: 1rem;
+  border: 1px solid var(--borde); border-radius: 6px;
+}
+dialog input[type="text"]:focus { outline: 2px solid var(--primario); border-color: var(--primario); }
+dialog input.invalido { border-color: var(--rojo-borde); outline-color: var(--rojo-borde); }
+.error-campo { display: block; min-height: 1.2em; margin-top: 4px; color: var(--rojo-borde); font-size: .85rem; }
+.fila-check { display: flex !important; align-items: center; gap: 8px; margin-top: 8px; font-weight: 400; }
+.modal-botones { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+
+@media (max-width: 520px) {
+  .encabezado { flex-direction: column; align-items: stretch; }
+  .tarjetas { grid-template-columns: 1fr; }
 }

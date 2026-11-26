@@ -1,13 +1,14 @@
 // Modelo: único lugar que habla con la base de datos (SQL)
 const pool = require('../config/db');
 
-const COLUMNAS = 'id, titulo, completada';
+const COLUMNAS = 'id, titulo, completada, creada_en';
 
 // MySQL devuelve completada como 0/1; lo convertimos a booleano
 const formatear = (fila) => ({
   id: fila.id,
   titulo: fila.titulo,
   completada: Boolean(fila.completada),
+  creada_en: fila.creada_en,
 });
 
 const Tarea = {

@@ -3,109 +3,87 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css">
-  <title>CRUD de tareas</title>
+  <title>Gestor de tareas</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Lista de tareas</h1>
-  <div id="error"></div>
+  <main class="contenedor">
+    <header class="encabezado">
+      <div>
+        <h1>Gestor de tareas</h1>
+        <p class="sub">CRUD INCCA · Ingeniería de Software III</p>
+      </div>
+      <button id="btn-nueva" class="btn btn-primario" type="button">+ Nueva tarea</button>
+    </header>
 
-  <form id="form-tarea">
-    <input type="text" id="titulo" placeholder="Nueva tarea..." required />
-    <button type="submit">Agregar</button>
-  </form>
+    <div id="alerta" class="alerta oculto" role="alert">
+      <span id="alerta-texto"></span>
+      <button id="alerta-cerrar" class="alerta-cerrar" type="button" aria-label="Cerrar alerta">×</button>
+    </div>
 
-  <ul id="lista"></ul>
+    <section class="tarjetas" aria-label="Resumen">
+      <article class="tarjeta">
+        <span class="tarjeta-titulo">Total</span>
+        <strong id="n-total">0</strong>
+      </article>
+      <article class="tarjeta">
+        <span class="tarjeta-titulo">Pendientes</span>
+        <strong id="n-pendientes">0</strong>
+      </article>
+      <article class="tarjeta">
+        <span class="tarjeta-titulo">Completadas</span>
+        <strong id="n-completadas">0</strong>
+      </article>
+    </section>
 
-  <script>
-    const API = 'http://localhost:3000/api/tareas';
-    const lista = document.getElementById('lista');
-    const form = document.getElementById('form-tarea');
-    const inputTitulo = document.getElementById('titulo');
-    const errorBox = document.getElementById('error');
+    <section class="tabla-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Título</th>
+            <th>Estado</th>
+            <th>Creada</th>
+            <th class="col-acciones">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <p id="mensaje-tabla" class="mensaje-tabla">Cargando tareas...</p>
+    </section>
+  </main>
 
-    function mostrarError(msg) { errorBox.textContent = msg || ''; }
+  <!-- Modal: crear / editar -->
+  <dialog id="modal-form">
+    <form id="form-tarea" novalidate>
+      <h2 id="modal-form-titulo">Nueva tarea</h2>
 
-    // Función auxiliar para hacer peticiones y manejar errores
-    async function peticion(url, opciones) {
-      const res = await fetch(url, opciones);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Error en la petición');
-      return data;
-    }
+      <label for="titulo">Título</label>
+      <input type="text" id="titulo" name="titulo" maxlength="300" autocomplete="off" />
+      <small id="error-titulo" class="error-campo"></small>
 
-    // GET: cargar y pintar las tareas
-    async function cargarTareas() {
-      try {
-        const tareas = await peticion(API);
-        lista.innerHTML = '';
-        tareas.forEach(pintarTarea);
-        mostrarError('');
-      } catch (e) { mostrarError(e.message); }
-    }
+      <label id="fila-completada" class="fila-check oculto">
+        <input type="checkbox" id="completada" />
+        Marcar como completada
+      </label>
 
-    function pintarTarea(t) {
-      const li = document.createElement('li');
-      if (t.completada) li.classList.add('hecha');
+      <div class="modal-botones">
+        <button type="button" id="btn-cancelar" class="btn">Cancelar</button>
+        <button type="submit" id="btn-guardar" class="btn btn-primario">Guardar</button>
+      </div>
+    </form>
+  </dialog>
 
-      const check = document.createElement('input');
-      check.type = 'checkbox';
-      check.checked = t.completada;
-      check.onchange = () => actualizar(t.id, { completada: check.checked });
+  <!-- Modal: confirmar eliminación -->
+  <dialog id="modal-eliminar">
+    <h2>Eliminar tarea</h2>
+    <p id="texto-eliminar"></p>
+    <div class="modal-botones">
+      <button type="button" id="btn-no-eliminar" class="btn">Cancelar</button>
+      <button type="button" id="btn-si-eliminar" class="btn btn-peligro">Sí, eliminar</button>
+    </div>
+  </dialog>
 
-      const span = document.createElement('span');
-      span.textContent = t.titulo;
-
-      const btnEditar = document.createElement('button');
-      btnEditar.textContent = 'Editar';
-      btnEditar.onclick = () => {
-        const nuevo = prompt('Editar tarea:', t.titulo);
-        if (nuevo !== null) actualizar(t.id, { titulo: nuevo });
-      };
-
-      const btnEliminar = document.createElement('button');
-      btnEliminar.textContent = 'Eliminar';
-      btnEliminar.onclick = () => eliminar(t.id);
-
-      li.append(check, span, btnEditar, btnEliminar);
-      lista.appendChild(li);
-    }
-
-    // POST: crear tarea
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      try {
-        await peticion(API, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ titulo: inputTitulo.value }),
-        });
-        inputTitulo.value = '';
-        cargarTareas();
-      } catch (err) { mostrarError(err.message); }
-    });
-
-    // PUT: actualizar tarea
-    async function actualizar(id, cambios) {
-      try {
-        await peticion(`${API}/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(cambios),
-        });
-        cargarTareas();
-      } catch (err) { mostrarError(err.message); cargarTareas(); }
-    }
-
-    // DELETE: eliminar tarea
-    async function eliminar(id) {
-      try {
-        await peticion(`${API}/${id}`, { method: 'DELETE' });
-        cargarTareas();
-      } catch (err) { mostrarError(err.message); }
-    }
-
-    cargarTareas();
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>

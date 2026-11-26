@@ -20,6 +20,7 @@ exports.crear = async (req, res) => {
   }
   const nueva = await Tarea.crear(titulo.trim());
   res.status(201).json(nueva);
+  console.log("tarea creada");
 };
 
 exports.actualizar = async (req, res) => {
@@ -47,4 +48,6 @@ exports.eliminar = async (req, res) => {
   const tarea = await Tarea.eliminar(req.params.id);
   if (!tarea) return res.status(404).json({ error: 'Tarea no encontrada' });
   res.json({ mensaje: 'Tarea eliminada', tarea });
+  console.log("tarea elminida");
+  
 };
